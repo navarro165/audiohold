@@ -35,26 +35,21 @@ On a macOS version without the CoreAudio process list the menu shows no holders 
 Requirements: a recent macOS with the CoreAudio process object API (developed and tested on macOS 26; Apple documents the related process tap API from macOS 14.2), Xcode command line tools (`swiftc`), Homebrew.
 
 ```sh
-brew install swiftbar nowplaying-cli
 git clone https://github.com/navarro165/audiohold.git
 cd audiohold
-mkdir -p ~/.local/bin
-swiftc -O audioroute.swift -o ~/.local/bin/audioroute
-mkdir -p ~/SwiftBarPlugins
-cp audiohold.5s.sh ~/SwiftBarPlugins/
-chmod +x ~/SwiftBarPlugins/audiohold.5s.sh
+./install.sh
 ```
 
-Then open SwiftBar and choose `~/SwiftBarPlugins` as its plugin folder. The `5s` in the file name is the refresh interval.
+`install.sh` installs SwiftBar and `nowplaying-cli` with Homebrew if they are missing, builds the helper into `~/.local/bin/audioroute`, copies the plugin into the folder SwiftBar already watches (or sets that folder to `~/SwiftBarPlugins` if none is set, restarting SwiftBar if it was running), and opens SwiftBar. Run it again after `git pull` to update; if your installed plugin was edited, it is saved to `~/Library/Application Support/audiohold/` first. The `5s` in the plugin's file name is the refresh interval.
 
 ### Settings
 
-Change a setting by editing the defaults at the top of `audiohold.5s.sh`, or by exporting the variable from your login profile (`~/.zprofile` with SwiftBar's default zsh shell); SwiftBar runs plugins in a login shell, so interactive-only shell config is not read:
+Change a setting by exporting the variable from your login profile, which survives updates (`~/.zprofile` with SwiftBar's default zsh shell); SwiftBar runs plugins in a login shell, so interactive-only shell config is not read. Editing the defaults at the top of the installed `audiohold.5s.sh` also works, but an update replaces that file:
 
 | Variable | Default | Meaning |
 |---|---|---|
 | `AUDIOHOLD_AUDIOROUTE` | `~/.local/bin/audioroute` | Path to the compiled helper |
-| `AUDIOHOLD_PARK_UID` | `BuiltInSpeakerDevice` | Device UID to park on. Run `audioroute list` to see every output device and its UID. Macs without built-in speakers need this set |
+| `AUDIOHOLD_PARK_UID` | `BuiltInSpeakerDevice` | Device UID to park on. Run `~/.local/bin/audioroute list` to see every output device and its UID. Macs without built-in speakers need this set |
 
 The remembered output for Unpark is stored in `~/Library/Application Support/audiohold/previous-output-uid`. It is forgotten after Unpark (even if that device is gone) and when you pick another output yourself.
 
@@ -63,9 +58,9 @@ The remembered output for Unpark is stored in `~/Library/Application Support/aud
 `audioroute` is a single Swift file with no dependencies:
 
 ```sh
-audioroute status          # default output, then every process running output and its device UIDs
-audioroute list            # every device that has an output, with its UID
-audioroute set <UID>       # set the default and alert-sound output to a device
+~/.local/bin/audioroute status      # default output, then every process running output and its device UIDs
+~/.local/bin/audioroute list        # every device that has an output, with its UID
+~/.local/bin/audioroute set <UID>   # set the default and alert-sound output to a device
 ```
 
 ## Security notes
